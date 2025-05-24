@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "18126615010",
+    "project_id": "zatlunelabs",
+    "storage_bucket": "zatlunelabs.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:18126615010:android:f732fe54392064a10509bb",
+        "android_client_info": {
+          "package_name": "com.zalune.fm_zeroa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "18126615010-u8s8k92kb7r9jmcavjctu4ja1jft6rp8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zalune.fm_zeroa",
+            "certificate_hash": "fc21e9a8b9fdc428de62c22a22837e4110f5bf50"
+          }
+        },
+        {
+          "client_id": "18126615010-sc3f3gvp0386f1ja8c0cvtrp70d82f65.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANSEDUnZfkjd2NVu60sS5q2ZZpl_Z3644"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "18126615010-sc3f3gvp0386f1ja8c0cvtrp70d82f65.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

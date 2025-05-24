@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/menu_categories_fragment">
+
+    <!-- MENU -->
+    <fragment
+        android:id="@+id/menu_categories_fragment"
+        android:name="com.zalune.fm_zeroa.presentation.ui.screens.menu.MenuCategoriesFragment"
+        android:label="Menú"
+        tools:layout="@layout/fragment_menu_categories" />
+
+    <!-- FILES LIST -->
+    <fragment
+        android:id="@+id/file_list_fragment"
+        android:name="com.zalune.fm_zeroa.presentation.ui.screens.file.FileListFragment"
+        android:label="Archivos"
+        tools:layout="@layout/fragment_file_list">
+        <!-- Acción hacia la previsualización  -->
+        <action
+            android:id="@+id/action_list_to_preview"
+            app:destination="@id/file_preview_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right">
+            <argument
+                android:name="uriArg"
+                app:argType="string" />
+        </action>
+    </fragment>
+
+    <!-- 2 FILE PREVIEW -->
+    <fragment
+        android:id="@+id/file_preview_fragment"
+        android:name="com.zalune.fm_zeroa.presentation.ui.screens.file.FilePreviewFragment"
+        android:label="Previsualización"
+        tools:layout="@layout/fragment_file_preview" />
+
+    <!-- CLOUD -->
+    <fragment
+        android:id="@+id/cloud_files_fragment"
+        android:name="com.zalune.fm_zeroa.presentation.ui.screens.cloud.CloudFilesFragment"
+        android:label="Nube"
+        tools:layout="@layout/fragment_cloud_files">
+        <!-- LoginFragment -->
+        <action
+            android:id="@+id/action_cloudFilesFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_cloudFilesFragment_self"
+            app:destination="@id/cloud_files_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.zalune.fm_zeroa.presentation.ui.screens.auth.LoginFragment"
+        android:label="Iniciar sesión"
+        tools:layout="@layout/fragment_login">
+
+        <!-- Acción a RegisterFragment -->
+        <action
+            android:id="@+id/action_loginFragment_to_registerFragment"
+            app:destination="@id/registerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.zalune.fm_zeroa.presentation.ui.screens.auth.RegisterFragment"
+        android:label="Registro"
+        tools:layout="@layout/fragment_register" >
+
+        <action
+            android:id="@+id/action_registerFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+</navigation>

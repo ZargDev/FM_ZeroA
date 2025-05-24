@@ -1,0 +1,27 @@
+<!-- res/layout/top_app_bar_custom.xml -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:id="@+id/containerTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="start|center_vertical"
+        android:layout_marginEnd="16dp"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:background="@android:color/transparent">
+
+        <TextView
+            android:id="@+id/tvPath"
+            style="@style/TextAppearance.MaterialComponents.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="middle"
+            android:maxLines="1"
+            android:textColor="?attr/colorOnSurface"/>
+    </LinearLayout>
+
+
+</merge>

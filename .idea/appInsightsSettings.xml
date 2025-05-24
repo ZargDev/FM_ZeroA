@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.zalune.fm_zeroa" />
+                  <option name="mobileSdkAppId" value="1:18126615010:android:f732fe54392064a10509bb" />
+                  <option name="projectId" value="zatlunelabs" />
+                  <option name="projectNumber" value="18126615010" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

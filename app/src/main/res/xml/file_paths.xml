@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 1) Raíz de almacenamiento interno/emulado (equivalente a "external storage") -->
+    <external-path
+        name="external_files"
+        path="." />
+
+    <!-- 2) Archivos de tu propia app en external files dir -->
+    <external-files-path
+        name="app_files"
+        path="." />
+
+    <!-- 3) Exponer TODO el sistema de archivos (cautela: requiere MANAGE_EXTERNAL_STORAGE) -->
+    <root-path
+        name="root"
+        path="." />
+</paths>

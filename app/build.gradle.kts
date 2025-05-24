@@ -2,16 +2,20 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.gms.google.services)
     id("com.google.devtools.ksp")
+    id("dagger.hilt.android.plugin")
+    //Safe Args
+    id("androidx.navigation.safeargs")
 }
 
 android {
-    namespace = "com.example.fm_zeroa"
+    namespace = "com.zalune.fm_zeroa"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.fm_zeroa"
-        minSdk = 24
+        applicationId = "com.zalune.fm_zeroa"
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -40,6 +44,7 @@ android {
         dataBinding = true
         viewBinding = true
     }
+
 }
 
 dependencies {
@@ -89,4 +94,18 @@ dependencies {
 
     //Corrutinas
     implementation(libs.kotlinx.coroutines.android)
+
+    implementation (libs.material)
+// Navigation KTX (para findNavController())
+    implementation (libs.androidx.navigation.fragment.ktx)
+    implementation (libs.androidx.navigation.ui.ktx)
+
+    // Material Icons Extended (íconos adicionales)
+    implementation ("androidx.compose.material:material-icons-extended:1.7.8")
+    // Material Components (incluye íconos básicos)
+    implementation ("com.google.android.material:material:1.12.0") // Usa la última versión
+
+    implementation(libs.androidx.navigation.fragment.ktx.v290)
+    implementation(libs.androidx.navigation.ui.ktx.v290)
+    implementation ("com.google.android.material:material:1.12.0")
 }

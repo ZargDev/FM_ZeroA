@@ -1,3 +1,22 @@
 <resources>
-    <string name="app_name">FM_ZeroA</string>
+    <string name="app_name">ZeroFM</string>
+    <!-- SOLO texto descriptivo -->
+    <string name="file_icon">Icono de archivo o carpeta</string>
+    <string name="search">Buscar</string>
+    <string name="refresh">Refrescar</string>
+    <string name="settings">Ajustes</string>
+    <string name="action_copy">Copiar</string>
+    <string name="action_cut">Cortar</string>
+    <string name="action_delete">Borrar</string>
+    <string name="action_rename">Renombrar</string>
+    <string name="action_info">Información</string>
+    <string name="action_search">Buscar</string>
+    <string name="action_view_mode">Vista</string>
+    <string name="action_more">Más</string>
+    <string name="copy_success">Ruta copiada al portapapeles</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="user_icon">user</string>
+
+
 </resources>
