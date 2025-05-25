@@ -97,29 +97,40 @@ class MainActivity : AppCompatActivity() {
             if (destId == currentTabId) return@setOnItemSelectedListener true
 
             val currentIndex = tabs.indexOf(currentTabId)
-            val destIndex = tabs.indexOf(destId)
-
-            // Dirección basada en la posición REAL de las pestañas
+            val destIndex    = tabs.indexOf(destId)
             val isMovingToRight = destIndex > currentIndex
 
-            val (enterAnim, exitAnim) = if (isMovingToRight) {
-                R.anim.slide_in_right_bounce to R.anim.slide_out_left_bounce
+            // Aquí definimos los cuatro anims según la dirección
+            val (enterAnim, exitAnim, popEnterAnim, popExitAnim) = if (isMovingToRight) {
+                // Navegación hacia la derecha
+                listOf(
+                    R.anim.slide_in_right_bounce,  // nueva entra desde la derecha
+                    R.anim.slide_out_left_bounce,  // actual sale hacia la izquierda
+                    R.anim.slide_in_left_bounce,   // al hacer POP entra desde la izquierda
+                    R.anim.slide_out_right_bounce  // al hacer POP sale hacia la derecha
+                )
             } else {
-                R.anim.slide_in_left_bounce to R.anim.slide_out_right_bounce
+                // Navegación hacia la izquierda
+                listOf(
+                    R.anim.slide_in_left_bounce,   // nueva entra desde la izquierda
+                    R.anim.slide_out_right_bounce, // actual sale hacia la derecha
+                    R.anim.slide_in_right_bounce,  // al hacer POP entra desde la derecha
+                    R.anim.slide_out_left_bounce   // al hacer POP sale hacia la izquierda
+                )
             }
 
             val options = NavOptions.Builder()
                 .setLaunchSingleTop(true)               // Evita múltiples instancias
                 .setRestoreState(true)                  // Restaura estado guardado
                 .setPopUpTo(
-                    /* popUpToId = */ navController.graph.startDestinationId,
+                    navController.graph.startDestinationId,
                     /* inclusive = */ false,
-                    /* saveState = */ true              // Guarda el estado del popUpTo
+                    /* saveState = */ true
                 )
                 .setEnterAnim(enterAnim)
-                .setExitAnim(exitAnim)
-                .setPopEnterAnim(R.anim.slide_in_left_bounce)
-                .setPopExitAnim(R.anim.slide_out_right_bounce)
+                .setExitAnim (exitAnim)
+                .setPopEnterAnim(popEnterAnim)
+                .setPopExitAnim (popExitAnim)
                 .build()
 
             highlightMenuItem(bottomNav, destId)
@@ -127,6 +138,7 @@ class MainActivity : AppCompatActivity() {
             currentTabId = destId
             true
         }
+
         // Listener de cambios de destino para TopBar
         navController.addOnDestinationChangedListener { _, destination, _ ->
             highlightMenuItem(bottomNav, destination.id)
