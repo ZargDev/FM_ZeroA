@@ -109,7 +109,13 @@ class MainActivity : AppCompatActivity() {
             }
 
             val options = NavOptions.Builder()
-                .setLaunchSingleTop(true)
+                .setLaunchSingleTop(true)               // Evita múltiples instancias
+                .setRestoreState(true)                  // Restaura estado guardado
+                .setPopUpTo(
+                    /* popUpToId = */ navController.graph.startDestinationId,
+                    /* inclusive = */ false,
+                    /* saveState = */ true              // Guarda el estado del popUpTo
+                )
                 .setEnterAnim(enterAnim)
                 .setExitAnim(exitAnim)
                 .setPopEnterAnim(R.anim.slide_in_left_bounce)

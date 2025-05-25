@@ -24,7 +24,6 @@ import com.zalune.fm_zeroa.domain.model.FileItem
 import com.zalune.fm_zeroa.presentation.adapter.FileListAdapter
 import com.zalune.fm_zeroa.presentation.components.FileIconProvider
 import com.zalune.fm_zeroa.presentation.ui.viewmodel.FileListViewModel
-import com.zalune.fm_zeroa.utils.OnBackPressedHandler
 import com.zalune.fm_zeroa.utils.PermissionManager
 
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,7 +32,7 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class FileListFragment : Fragment(), OnBackPressedHandler  {
+class FileListFragment : Fragment() {
 
     private var _binding: FragmentFileListBinding? = null
     private val binding get() = _binding!!
@@ -59,26 +58,7 @@ class FileListFragment : Fragment(), OnBackPressedHandler  {
             ).show()
         }
     }
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        //outState.putString("CURRENT_PATH", viewModel.currentPath.value)
-        viewModel.getCurrentPath()?.let {
-            outState.putString("CURRENT_PATH", it) // ✅ Usa el método seguro del ViewModel
-        }
-    }
 
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        super.onViewStateRestored(savedInstanceState)
-        savedInstanceState?.getString("CURRENT_PATH")?.let { savedPath ->
-//            viewModel.currentPath.observe(viewLifecycleOwner) { newPath ->
-//                Log.d("FLF", "currentPath cambió a: $newPath")
-//                (activity as? MainActivity)?.onPathChanged(newPath)
-//            }
-            if (viewModel.getCurrentPath() != savedPath) {
-                viewModel.navigateTo(savedPath) // ✅ Actualiza directamente el ViewModel
-            }
-        }
-    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -92,20 +72,20 @@ class FileListFragment : Fragment(), OnBackPressedHandler  {
         // Indicamos que este fragment usa menú (navegacion de carpetas)
         setHasOptionsMenu(true)
         // 1) Registrar custom back handling
-//        requireActivity().onBackPressedDispatcher.addCallback(
-//            viewLifecycleOwner,
-//            object : OnBackPressedCallback(true) {
-//                override fun handleOnBackPressed() {
-//                    if (viewModel.navigateUp()) {
-//                        // navegó al directorio padre
-//                    } else {
-//                        // estamos en la raíz: deja que el sistema lo maneje
-//                        isEnabled = false
-//                        requireActivity().onBackPressed()
-//                    }
-//                }
-//            }
-//        )
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (viewModel.navigateUp()) {
+                        // navegó al directorio padre
+                    } else {
+                        // estamos en la raíz: deja que el sistema lo maneje
+                        isEnabled = false
+                        requireActivity().onBackPressed()
+                    }
+                }
+            }
+        )
         // Configuración del RecyclerView y su adapter
         adapter = FileListAdapter(
             iconProvider,
@@ -128,7 +108,10 @@ class FileListFragment : Fragment(), OnBackPressedHandler  {
         }
 
 
-        initializeListing()
+        if (savedInstanceState == null) {
+            // Primera vez que se crea la vista: inicializa el VM
+            initializeListing()
+        }
 
         // Observa los cambios en la lista de archivos
 // 1) Observer de lista
@@ -204,7 +187,6 @@ class FileListFragment : Fragment(), OnBackPressedHandler  {
         }
     }
 
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_file_list, menu)
         val searchItem = menu.findItem(R.id.action_search)
@@ -222,10 +204,6 @@ class FileListFragment : Fragment(), OnBackPressedHandler  {
             })
         }
         super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onBackPressed(): Boolean {
-        return viewModel.navigateUp()// Delegamos al ViewModel
     }
 
     override fun onDestroyView() {

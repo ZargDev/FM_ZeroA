@@ -1,5 +1,6 @@
 package com.zalune.fm_zeroa.presentation.ui.viewmodel
 
+import android.os.Parcelable
 import androidx.lifecycle.*
 import com.zalune.fm_zeroa.domain.model.FileItem
 
@@ -17,6 +18,9 @@ class AccessRestrictedException(message: String): Exception(message)
 class FileListViewModel @Inject constructor(
     private val repo: IFileExplorerRepository
 ) : ViewModel() {
+    var listState: Parcelable? = null
+    var currentQuery: String = ""
+    private var initialized = false
 
     // Respaldo de la lista completa para filtros
     private var _allFiles: List<FileItem> = emptyList()
@@ -24,9 +28,6 @@ class FileListViewModel @Inject constructor(
     // Estado de la ruta actual
     private val _currentPath = MutableLiveData<String>()
     val currentPath: LiveData<String> get() = _currentPath
-
-    // Método para obtener el valor actual (seguro) ZARGSADD
-    fun getCurrentPath(): String? = _currentPath.value
 
     // LiveData para la lista de archivos
     private val _fileList = MutableLiveData<List<FileItem>>()
@@ -40,6 +41,8 @@ class FileListViewModel @Inject constructor(
      * Inicializa el ViewModel con la ruta dada y carga los archivos.
      */
     fun initialize(defaultPath: String) {
+        if (initialized) return
+        initialized = true
         _currentPath.value = defaultPath
         loadFiles(defaultPath)
     }
@@ -77,10 +80,8 @@ class FileListViewModel @Inject constructor(
      * Navega a un subdirectorio y recarga.
      */
     fun navigateTo(path: String) {
-        if (path != _currentPath.value) { // ✅ Evita recargar si ya está en la misma ruta
-            _currentPath.value = path
-            loadFiles(path)
-        }
+        _currentPath.value = path
+        loadFiles(path)
     }
 
     /**
