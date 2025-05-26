@@ -47,27 +47,45 @@
         tools:layout="@layout/fragment_file_preview" />
 
     <!-- CLOUD -->
+    <!-- CLOUDFILES: muestra diálogo o va a login / contenido -->
     <fragment
         android:id="@+id/cloud_files_fragment"
         android:name="com.zalune.fm_zeroa.presentation.ui.screens.cloud.CloudFilesFragment"
-        android:label="Nube"
+        android:label="CloudFiles"
         tools:layout="@layout/fragment_cloud_files">
-        <!-- LoginFragment -->
+
+        <!-- → LoginFragment -->
         <action
             android:id="@+id/action_cloudFilesFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
+
+        <!-- → CloudContentFragment -->
         <action
-            android:id="@+id/action_cloudFilesFragment_self"
-            app:destination="@id/cloud_files_fragment" />
+            android:id="@+id/action_cloudFilesFragment_to_cloudContentFragment"
+            app:destination="@id/cloudContentFragment" />
     </fragment>
 
+    <!-- CLOUD CONTENT: muestra lista, logout → menú -->
+    <fragment
+        android:id="@+id/cloudContentFragment"
+        android:name="com.zalune.fm_zeroa.presentation.ui.screens.cloud.CloudContentFragment"
+        android:label="CloudContent"
+        tools:layout="@layout/fragment_cloud_content">
+
+        <!-- → MenuCategoriesFragment -->
+        <action
+            android:id="@+id/action_cloudContentFragment_to_menuCategoriesFragment"
+            app:destination="@id/menu_categories_fragment"
+            app:popUpTo="@id/menu_categories_fragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- LOGIN / REGISTER -->
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.zalune.fm_zeroa.presentation.ui.screens.auth.LoginFragment"
         android:label="Iniciar sesión"
         tools:layout="@layout/fragment_login">
-
-        <!-- Acción a RegisterFragment -->
         <action
             android:id="@+id/action_loginFragment_to_registerFragment"
             app:destination="@id/registerFragment" />
@@ -77,12 +95,12 @@
         android:id="@+id/registerFragment"
         android:name="com.zalune.fm_zeroa.presentation.ui.screens.auth.RegisterFragment"
         android:label="Registro"
-        tools:layout="@layout/fragment_register" >
-
+        tools:layout="@layout/fragment_register">
         <action
             android:id="@+id/action_registerFragment_to_loginFragment"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
     </fragment>
+
 </navigation>

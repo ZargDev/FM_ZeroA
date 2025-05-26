@@ -14,7 +14,7 @@
     <string name="action_view_mode">Vista</string>
     <string name="action_more">Más</string>
     <string name="copy_success">Ruta copiada al portapapeles</string>
-<!--Descripciones del TopAppBar-->
+    <!--Descripciones del TopAppBar-->
     <string name="menu_multi_select">Selección múltiple</string>
     <string name="menu_create">Crear carpeta/archivo .txt</string>
     <string name="menu_settings">Configuración</string>
