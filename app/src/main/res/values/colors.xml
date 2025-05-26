@@ -40,12 +40,12 @@
     <!-- Un secundario a tu gusto (e.g. naranja oscuro) -->
     <color name="banana_secondary">#FF9800</color>
     <!--colores para navegacion-->
-    <color name="bnv_icon_color_home_selected">#0065FF</color>
-    <color name="bnv_icon_color_files_selected">#4CAF50</color>
-    <color name="bnv_icon_color_cloud_selected">#FFC107</color>
-    <color name="bnv_icon_color_home_unselected">#002461</color>
-    <color name="bnv_icon_color_files_unselected">#17491A</color>
-    <color name="bnv_icon_color_cloud_unselected">#624B05</color>
+    <color name="bnv_icon_color_files_selected">#FBE14B</color>
+    <color name="bnv_icon_color_home_selected">#39C5BB</color>
+    <color name="bnv_icon_color_cloud_selected">#D14D7E</color>
+    <color name="bnv_icon_color_files_unselected">#5E4A10</color>
+    <color name="bnv_icon_color_home_unselected">#1C5E59</color>
+    <color name="bnv_icon_color_cloud_unselected">#5A1F35</color>
     <color name="persistent_active">#181818</color>
     <color name="persistent_inactive">#000000</color>
 </resources>
