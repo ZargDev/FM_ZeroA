@@ -28,5 +28,6 @@
             android:textAppearance="?attr/textAppearanceBodyLarge"
             android:textSize="18sp"
             android:visibility="gone"/>
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

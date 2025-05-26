@@ -13,7 +13,7 @@ import javax.inject.Singleton
 class PermissionManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    // Ya existente...
+
 
     /** Comprueba si tenemos el permiso MANAGE_EXTERNAL_STORAGE (All files access) */
     fun hasAllFilesPermission(): Boolean {

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/optNewFolder"
+        style="@style/ActionRow"
+        android:text="@string/create_new_folder"
+        android:drawableStart="@drawable/ic_create_new_folder"
+        android:drawablePadding="16dp" />
+
+    <View style="@style/ActionSeparator"/>
+
+    <TextView
+        android:id="@+id/optNewTxtFile"
+        style="@style/ActionRow"
+        android:text="@string/create_new_txt"
+        android:drawableStart="@drawable/ic_insert_drive_file"
+        android:drawablePadding="16dp" />
+
+</LinearLayout>

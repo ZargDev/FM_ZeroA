@@ -1,6 +1,9 @@
 package com.zalune.fm_zeroa.presentation.ui.screens.file
 
 import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,13 +11,25 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.os.bundleOf
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.zalune.fm_zeroa.R
+import com.zalune.fm_zeroa.databinding.DialogFileInfoBinding
 import com.zalune.fm_zeroa.databinding.FragmentFileActionSheetBinding
+import com.zalune.fm_zeroa.domain.repository.usecase.GetFileInfoUseCase
 import com.zalune.fm_zeroa.presentation.ui.viewmodel.FileActionViewModel
+import com.zalune.fm_zeroa.presentation.ui.viewmodel.FileListViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.io.File
+import java.util.Date
+import javax.inject.Inject
+import kotlin.getValue
+
 
 @AndroidEntryPoint
 class FileActionBottomSheetFragment : BottomSheetDialogFragment() {
@@ -22,7 +37,10 @@ class FileActionBottomSheetFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentFileActionSheetBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: FileActionViewModel by viewModels()
+    private val actionVM: FileActionViewModel by viewModels()
+    private val listVM: FileListViewModel by activityViewModels()
+    @Inject
+    lateinit var getInfoUseCase: GetFileInfoUseCase
 
     companion object {
         private const val ARG_PATH = "arg_path"
@@ -41,65 +59,102 @@ class FileActionBottomSheetFragment : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val sourcePath = requireArguments().getString(ARG_PATH)!!
-        val parentDirPath = File(sourcePath).parent ?: ""
-        val path = requireArguments().getString(ARG_PATH)!!
-        // Mostrar el nombre con extensión o solo carpeta
-        val displayName = File(path).name
-        binding.tvItemName.text = displayName
+        val parentDir = File(sourcePath).parent.orEmpty()
+        binding.tvItemName.text = File(sourcePath).name
 
-        // Copiar al mismo directorio padre
+        // COPIAR: solo preparamos clipboard
         binding.actionCopy.setOnClickListener {
-            viewModel.copy(sourcePath, parentDirPath)
+            listVM.prepareCopy(sourcePath)
+            Toast.makeText(requireContext(), "Copiado al portapapeles", Toast.LENGTH_SHORT).show()
             dismiss()
         }
-        // Mover (cortar) al mismo directorio padre
+
+        // CORTAR: preparamos clipboard
         binding.actionCut.setOnClickListener {
-            viewModel.cut(sourcePath, parentDirPath)
+            listVM.prepareCut(sourcePath)
+            Toast.makeText(requireContext(), "Cortado al portapapeles", Toast.LENGTH_SHORT).show()
             dismiss()
         }
-        // Borrar permanente
+
+        // BORRAR permanente
         binding.actionDelete.setOnClickListener {
-            AlertDialog.Builder(requireContext())
+            MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_FM_ZeroA_MaterialAlertDialog)
                 .setTitle("Confirmar borrado")
-                .setMessage("¿Seguro que deseas eliminar permanentemente?\n$sourcePath")
+                .setMessage("¿Deseas eliminar permanentemente?\n$sourcePath")
                 .setPositiveButton("Eliminar") { _, _ ->
-                    viewModel.delete(sourcePath)
+                    actionVM.delete(sourcePath)
+                    listVM.loadFiles(parentDir)
                     dismiss()
                 }
                 .setNegativeButton("Cancelar", null)
                 .show()
         }
-        // Renombrar
+
+        // RENOMBRAR
         binding.actionRename.setOnClickListener {
-            showRenameDialog(sourcePath)
-        }
-        // Información
-        binding.actionInfo.setOnClickListener {
-            viewModel.getInfo(sourcePath)
-            dismiss()
+            val input = EditText(requireContext()).apply {
+                setText(File(sourcePath).name)
+                hint = "Nuevo nombre"
+            }
+            MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_FM_ZeroA_MaterialAlertDialog)
+                .setTitle("Renombrar")
+                .setView(input)
+                .setPositiveButton("OK") { _, _ ->
+                    val newName = input.text.toString().trim()
+                    if (newName.isNotEmpty()) {
+                        actionVM.rename(sourcePath, newName)
+                        listVM.loadFiles(parentDir)
+                    }
+                    dismiss()
+                }
+                .setNegativeButton("Cancelar", null)
+                .show()
         }
 
-        // Observa resultados y muestra Toast
-        viewModel.status.observe(viewLifecycleOwner) { msg ->
+        // INFO
+        binding.actionInfo.setOnClickListener {
+            dismiss()
+            showFileInfoDialog(sourcePath)
+        }
+
+
+        // Observa status de acciones (delete/rename/info)
+        actionVM.status.observe(viewLifecycleOwner) { msg ->
             Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun showRenameDialog(path: String) {
-        val input = EditText(requireContext()).apply {
-            setText(File(path).name)
-        }
-        AlertDialog.Builder(requireContext())
-            .setTitle("Renombrar")
-            .setView(input)
-            .setPositiveButton("OK") { _, _ ->
-                viewModel.rename(path, input.text.toString())
-                dismiss()
-            }
-            .setNegativeButton("Cancelar", null)
-            .show()
-    }
+    private fun showFileInfoDialog(path: String) {
+        // 1) Inflar layout binding
+        val infoBinding = DialogFileInfoBinding.inflate(layoutInflater)
+        // 2) Obtener datos
+        lifecycleScope.launch {
+            val info = getInfoUseCase(path)
+            infoBinding.infoName.text        = info.name
+            infoBinding.infoPath.text        = info.path
+            infoBinding.infoType.text        = if (info.isDirectory) "Carpeta" else "Archivo"
+            infoBinding.infoSize.text        = "${info.sizeBytes} bytes"
+            infoBinding.infoModified.text    = Date(info.lastModified).toString()
+            infoBinding.infoPerms.text       =
+                info.permissions.joinToString("\n") { "${it.first}: ${if (it.second) "✔" else "✘"}" }
 
+            // 3) Construir y mostrar el diálogo
+            MaterialAlertDialogBuilder(
+                requireContext(),
+                R.style.ThemeOverlay_FM_ZeroA_MaterialAlertDialog
+            )
+                .setView(infoBinding.root)
+                .setPositiveButton("OK", null)
+                .setNeutralButton("Copiar ruta") { _, _ ->
+                    // copiar al portapapeles
+                    val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE)
+                            as ClipboardManager
+                    cm.setPrimaryClip(ClipData.newPlainText("Ruta", info.path))
+                }
+                .setCancelable(true)
+                .show()
+        }
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

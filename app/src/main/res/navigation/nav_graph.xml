@@ -13,6 +13,12 @@
         android:label="Menú"
         tools:layout="@layout/fragment_menu_categories" />
 
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.zalune.fm_zeroa.presentation.ui.settings.SettingsFragment"
+        android:label="Ajustes"
+        tools:layout="@layout/fragment_settings" />
+
     <!-- FILES LIST -->
     <fragment
         android:id="@+id/file_list_fragment"

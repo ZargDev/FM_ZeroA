@@ -35,6 +35,10 @@
     <color name="md_theme_light_onSurface">#1C1B1F</color>
     <!--color para error-->
     <color name="md_theme_light_onSurfaceVariant">#49454F</color>
+    <!-- Amarillo BananaFile -->
+    <color name="banana_primary">#FBD45C</color>
+    <!-- Un secundario a tu gusto (e.g. naranja oscuro) -->
+    <color name="banana_secondary">#FF9800</color>
     <!--colores para navegacion-->
     <color name="bnv_icon_color_home_selected">#0065FF</color>
     <color name="bnv_icon_color_files_selected">#4CAF50</color>

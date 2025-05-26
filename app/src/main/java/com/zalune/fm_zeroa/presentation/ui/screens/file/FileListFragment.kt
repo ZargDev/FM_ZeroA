@@ -15,7 +15,10 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.zalune.fm_zeroa.MainActivity
 import com.zalune.fm_zeroa.R
@@ -23,28 +26,36 @@ import com.zalune.fm_zeroa.databinding.FragmentFileListBinding
 import com.zalune.fm_zeroa.domain.model.FileItem
 import com.zalune.fm_zeroa.presentation.adapter.FileListAdapter
 import com.zalune.fm_zeroa.presentation.components.FileIconProvider
+import com.zalune.fm_zeroa.presentation.ui.fabmenu.FloatingActionsMenu
+import com.zalune.fm_zeroa.presentation.ui.screens.helpers.FileListActionsHelper
+import com.zalune.fm_zeroa.presentation.ui.screens.helpers.FileListUiHelper
+import com.zalune.fm_zeroa.presentation.ui.search.SearchFilesBottomSheetFragment
+import com.zalune.fm_zeroa.presentation.ui.stats.DirectoryStatsBottomSheetFragment
+import com.zalune.fm_zeroa.presentation.ui.topbar.TopAppBarCustom
+import com.zalune.fm_zeroa.presentation.ui.viewmodel.ClipboardState
 import com.zalune.fm_zeroa.presentation.ui.viewmodel.FileListViewModel
 import com.zalune.fm_zeroa.utils.PermissionManager
 
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import javax.inject.Inject
+import kotlin.getValue
+
 
 
 @AndroidEntryPoint
 class FileListFragment : Fragment() {
 
     private var _binding: FragmentFileListBinding? = null
-    private val binding get() = _binding!!
+    val binding get() = _binding!!
 
-    private val viewModel: FileListViewModel by viewModels()
+    private lateinit var adapter: FileListAdapter
+    private val viewModel: FileListViewModel by activityViewModels()
+    private lateinit var fabMenu: FloatingActionsMenu
 
     @Inject lateinit var iconProvider: FileIconProvider
     @Inject lateinit var permissionManager: PermissionManager
 
-    private lateinit var adapter: FileListAdapter
-
-    // Lanzador para ir a Ajustes de "Manage All Files"
     private val manageAllFilesLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
@@ -60,7 +71,8 @@ class FileListFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentFileListBinding.inflate(inflater, container, false)
@@ -69,141 +81,182 @@ class FileListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // Indicamos que este fragment usa menú (navegacion de carpetas)
         setHasOptionsMenu(true)
-        // 1) Registrar custom back handling
-        requireActivity().onBackPressedDispatcher.addCallback(
-            viewLifecycleOwner,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    if (viewModel.navigateUp()) {
-                        // navegó al directorio padre
-                    } else {
-                        // estamos en la raíz: deja que el sistema lo maneje
-                        isEnabled = false
-                        requireActivity().onBackPressed()
-                    }
-                }
-            }
-        )
-        // Configuración del RecyclerView y su adapter
+
+        val main = activity as? MainActivity ?: return
+
+        // 0) Inicializa tu adapter
         adapter = FileListAdapter(
             iconProvider,
-            onClick = { fileItem ->
-                onFileItemClicked(fileItem)
-            },
-            onLongClick = { fileItem ->
+            onClick = { item -> onFileItemClicked(item) },
+            onLongClick = { item ->
                 FileActionBottomSheetFragment
-                    .newInstance(fileItem.uri.path!!)
+                    .newInstance(item.uri.path!!)
                     .show(childFragmentManager, "FileActions")
             }
         )
-        binding.rvFileList.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvFileList.adapter = adapter
 
-// Observa la ruta y actualiza la barra cada vez que cambie: para el TopAppBar
-        viewModel.currentPath.observe(viewLifecycleOwner) { newPath ->
-            Log.d("FLF", "currentPath cambió a: $newPath")
-            (activity as? MainActivity)?.onPathChanged(newPath)
+        // 1) Recycler
+        FileListUiHelper.initRecycler(binding, adapter)
+
+        // 2) Toolbar
+        FileListUiHelper.setupToolbar(
+            fragment        = this,
+            topBar          = main.topBar,
+            onSearch        = {
+                SearchFilesBottomSheetFragment { q -> viewModel.filterFiles(q) }
+                    .show(childFragmentManager, "SearchSheet")
+            },
+            onViewMode      = { toggleViewMode() },
+            onMultiSelect   = { enterMultiSelectMode() },
+            onCreateFolder  = {
+                FileListActionsHelper.showCreateFolderDialog(
+                    requireContext(),
+                    viewModel.currentPath.value.orEmpty()
+                ) {
+                    // recarga
+                    viewModel.loadFiles(viewModel.currentPath.value.orEmpty())
+                }
+            },
+            onCreateTxt     = {
+                FileListActionsHelper.showCreateTxtDialog(
+                    requireContext(),
+                    viewModel.currentPath.value.orEmpty()
+                ) {
+                    viewModel.loadFiles(viewModel.currentPath.value.orEmpty())
+                }
+            },
+            onSettings      = { /* navegamos más tarde */ },
+            onAbout         = { FileListActionsHelper.showAboutDialog(requireContext()) },
+            onExit          = { requireActivity().finish() },
+            onPathClick     = { showStats() }
+        )
+
+
+        // 3) Observadores
+        FileListUiHelper.observeViewModel(this, binding, adapter, viewModel)
+
+        // 4) Back button
+        FileListUiHelper.setupBackHandling(
+            fragment    = this,
+            viewModel   = viewModel,
+            initialPath = Environment.getExternalStorageDirectory().path
+        )
+
+        // 5) Inicio de listado y permisos
+        FileListUiHelper.setupStoragePermissionFlow(
+            fragment        = this,
+            permissionManager = permissionManager,
+            launcher        = manageAllFilesLauncher,
+            onReady         = { initializeListing() }
+        )
+
+        // 6) Hook al FAB menu:
+        val fabMenu = main.fabMenu
+        val topBar = requireActivity()
+            .findViewById<TopAppBarCustom>(R.id.topAppBar)
+        val currentPath = viewModel.currentPath.value.orEmpty()
+
+        fabMenu.setOnCreateFolder {
+            FileListActionsHelper.showCreateFolderDialog(
+                requireContext(),
+                viewModel.currentPath.value.orEmpty()
+            ) {
+                // recarga
+                viewModel.loadFiles(viewModel.currentPath.value.orEmpty())
+            }
         }
 
+        fabMenu.setOnCreateTxt {
+            FileListActionsHelper.showCreateTxtDialog(
+                requireContext(),
+                viewModel.currentPath.value.orEmpty()
+            ) {
+                viewModel.loadFiles(viewModel.currentPath.value.orEmpty())
+            }
+        }
 
+// escucha cambios en el portapapeles
+
+        viewModel.clipboard.observe(viewLifecycleOwner) { cb ->
+            Log.d("FileListFragment", "clipboard changed → $cb")
+            when (cb) {
+                is ClipboardState.None -> {
+                    topBar.exitCopyMode()
+                    fabMenu.hidePasteMode()
+                }
+                is ClipboardState.Copy,
+                is ClipboardState.Cut -> {
+                    topBar.enterCopyMode { viewModel.clearClipboard() }
+                    fabMenu.showPasteMode {
+                        viewModel.currentPath.value?.let { target ->
+                            viewModel.paste(target)
+                        }
+                    }
+                }
+            }
+        }
         if (savedInstanceState == null) {
             // Primera vez que se crea la vista: inicializa el VM
             initializeListing()
         }
-
-        // Observa los cambios en la lista de archivos
-// 1) Observer de lista
-        viewModel.fileList.observe(viewLifecycleOwner) { list ->
-            adapter.submitList(list)
-            if (list.isEmpty()) {
-                binding.tvStatus.text =
-                    viewModel.errorMsg.value ?: "Carpeta vacía"
-                binding.tvStatus.visibility = View.VISIBLE
-            } else {
-                binding.tvStatus.visibility = View.GONE
-            }
-        }
-
-// 2) Observer de errores (opcional, para mensajes dinámicos)
-        viewModel.errorMsg.observe(viewLifecycleOwner) { msg ->
-            // Si llegó un mensaje y la lista está vacía, lo mostramos
-            if (msg != null && viewModel.fileList.value.isNullOrEmpty()) {
-                binding.tvStatus.text = msg
-                binding.tvStatus.visibility = View.VISIBLE
-            }
-        }
-
-
-
-        // Flujo de permiso al primer arranque / subsecuentes
-        when {
-            permissionManager.isFirstRun() -> {
-                AlertDialog.Builder(requireContext())
-                    .setTitle("Permiso requerido")
-                    .setMessage(
-                        "BananaFile necesita acceso completo al almacenamiento para funcionar correctamente."
-                    )
-                    .setPositiveButton("Conceder") { _, _ ->
-                        permissionManager.markFirstRunDone()
-                        requestAllFilesPermission()
-                    }
-                    .setNegativeButton("Salir") { _, _ ->
-                        requireActivity().finish()
-                    }
-                    .setCancelable(false)
-                    .show()
-            }
-            !permissionManager.hasAllFilesPermission() -> {
-                requestAllFilesPermission()
-            }
-            else -> {
-                initializeListing()
-            }
-        }
-    }
-
-    private fun requestAllFilesPermission() {
-        val intent = permissionManager.getManageAllFilesIntent(requireContext())
-        manageAllFilesLauncher.launch(intent)
     }
 
     private fun initializeListing() {
-        // Ruta raíz del almacenamiento primario
         val defaultPath = Environment.getExternalStorageDirectory().path
         viewModel.initialize(defaultPath)
     }
 
     private fun onFileItemClicked(item: FileItem) {
         if (item.isDirectory) {
-            // Navega a subdirectorio usando la ruta del File
-            val dir = File(item.uri.path ?: return)
-            viewModel.navigateTo(dir.path)
+
+            // Cargamos el nuevo directorio
+            viewModel.loadFiles(File(item.uri.path!!).path)
         } else {
-            // Previsualiza archivo convirtiendo uri a File
-            val file = File(item.uri.path ?: return)
-            FilePreviewFragment.openFile(requireContext(), file)
+            FilePreviewFragment.openFile(requireContext(), File(item.uri.path!!))
         }
+    }
+
+    private var isGrid = false
+    private fun toggleViewMode() {
+        isGrid = !isGrid
+        binding.rvFileList.layoutManager =
+            if (isGrid) GridLayoutManager(requireContext(), 3)
+            else LinearLayoutManager(requireContext())
+        adapter.notifyDataSetChanged()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_file_list, menu)
         val searchItem = menu.findItem(R.id.action_search)
-        val searchView = (searchItem.actionView as SearchView).apply {
+        (searchItem.actionView as? SearchView)?.apply {
             queryHint = "Buscar archivos…"
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String): Boolean {
-                    viewModel.filterFiles(query)
-                    return true
-                }
-                override fun onQueryTextChange(newText: String): Boolean {
-                    viewModel.filterFiles(newText)
-                    return true
-                }
+                override fun onQueryTextSubmit(query: String) =
+                    viewModel.filterFiles(query).let { true }
+                override fun onQueryTextChange(newText: String) =
+                    viewModel.filterFiles(newText).let { true }
             })
         }
         super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    private fun enterMultiSelectMode() {
+        // TODO: activa tu selección múltiple (o llama a tu helper)
+    }
+
+    private fun openSettings() {
+        findNavController().navigate(R.id.settingsFragment)
+    }
+
+    private fun showAbout() {
+        FileListActionsHelper.showAboutDialog(requireContext())
+    }
+
+    private fun showStats() {
+        DirectoryStatsBottomSheetFragment
+            .newInstance(viewModel.currentPath.value.orEmpty())
+            .show(childFragmentManager, "Stats")
     }
 
     override fun onDestroyView() {

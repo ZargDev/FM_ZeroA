@@ -8,15 +8,18 @@ import javax.inject.Inject
  * @return true si la copia fue exitosa.
  */
 class CopyFileUseCase @Inject constructor() {
-
     suspend operator fun invoke(sourcePath: String, targetDirPath: String): Boolean {
         return try {
             val source = File(sourcePath)
-            val targetDir = File(targetDirPath)
-            if (!targetDir.exists()) targetDir.mkdirs()
+            val targetDir = File(targetDirPath).apply { if (!exists()) mkdirs() }
             val dest = File(targetDir, source.name)
-            source.copyRecursively(dest, overwrite = true)
-            true
+            val success = if (source.isDirectory) {
+                source.copyRecursively(dest, overwrite = true)
+            } else {
+                source.copyTo(dest, overwrite = true)
+                true
+            }
+            success
         } catch (e: Exception) {
             e.printStackTrace()
             false

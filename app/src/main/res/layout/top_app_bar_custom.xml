@@ -22,6 +22,4 @@
             android:maxLines="1"
             android:textColor="?attr/colorOnSurface"/>
     </LinearLayout>
-
-
 </merge>

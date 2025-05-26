@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ZeroFM</string>
+    <string name="app_name">BananaFile</string>
     <!-- SOLO texto descriptivo -->
     <string name="file_icon">Icono de archivo o carpeta</string>
     <string name="search">Buscar</string>
@@ -14,9 +14,19 @@
     <string name="action_view_mode">Vista</string>
     <string name="action_more">Más</string>
     <string name="copy_success">Ruta copiada al portapapeles</string>
-    <!-- TODO: Remove or change this placeholder text -->
+<!--Descripciones del TopAppBar-->
+    <string name="menu_multi_select">Selección múltiple</string>
+    <string name="menu_create">Crear carpeta/archivo .txt</string>
+    <string name="menu_settings">Configuración</string>
+    <string name="menu_about">Acerca de</string>
+    <string name="menu_exit">Salir</string>
+    <!-- res/values/strings.xml -->
+    <string name="create">Crear</string>
+    <string name="create_new_folder">Nueva carpeta</string>
+    <string name="create_new_txt">Nuevo archivo .txt</string>
+    <string name="about_message">BananaFile v1.0\nDesarrollado por AxelW</string>
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="user_icon">user</string>
-
 
 </resources>

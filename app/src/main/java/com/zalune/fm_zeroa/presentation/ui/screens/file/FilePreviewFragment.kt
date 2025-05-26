@@ -34,10 +34,4 @@ class FilePreviewFragment : Fragment(R.layout.fragment_file_preview) {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        // Recupera args y usa openFile si quieres:
-        // val filePath = arguments?.getString("filePath") ?: return
-        // openFile(requireContext(), File(filePath))
-    }
 }

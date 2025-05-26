@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.zalune.fm_zeroa.databinding.ItemFileBinding
 import com.zalune.fm_zeroa.domain.model.FileItem
 import com.zalune.fm_zeroa.presentation.components.FileIconProvider
-
 import javax.inject.Inject
 
 class FileListAdapter @Inject constructor(

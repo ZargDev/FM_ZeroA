@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -24,8 +25,7 @@ class TopAppBarCustom @JvmOverloads constructor(
 
     // Variables inicializadas con lateinit
     private lateinit var tvPath: TextView
-
-    private lateinit var btnUser: ImageButton
+    private lateinit var tvStorageStats: TextView
 
     // Estado del panel
     private var isPanelExpanded = false
@@ -36,8 +36,7 @@ class TopAppBarCustom @JvmOverloads constructor(
     private var onViewMode: (() -> Unit)? = null
     private var onMore: (() -> Unit)? = null
     private var onPathClick: (() -> Unit)? = null
-    //Z-ADD
-    private var userButton: ImageButton? = null
+
 
     init {
         // Inflamos sólo el <merge> con los TextView encima de este Toolbar
@@ -51,19 +50,19 @@ class TopAppBarCustom @JvmOverloads constructor(
         tvPath = findViewById(R.id.tvPath)
         tvPath.setOnClickListener { showFullPathPopup() }
 
-
-
         // Listener de menú
         setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.action_search    -> onSearch?.invoke()
                 R.id.action_view_mode -> onViewMode?.invoke()
-                R.id.action_more      -> onMore?.invoke()
+                R.id.action_more -> {
+                    Log.d("TOPBAR","Se pulsó ‘Más’")
+                    onMore?.invoke()
+                }
                 else                  -> return@setOnMenuItemClickListener false
             }
             true
         }
-
     }
 
     fun updatePath(fullPath: String) {
@@ -72,6 +71,18 @@ class TopAppBarCustom @JvmOverloads constructor(
             .takeIf { it.size > 3 }
             ?.let { "../${it.takeLast(3).joinToString("/")}" }
             ?: fullPath
+    }
+
+    /** Z-ADD Título simple en lugar de ruta */
+    fun setTitleText(text: String) {
+        // Si tu layout tiene un TextView para título en vez de tvPath:
+        tvPath.text = text
+    }
+    /** Z-ADD Oculta la sección ruta+stats */
+    fun showPathSection(show: Boolean) {
+        val vis = if (show) View.VISIBLE else View.GONE
+        tvPath.visibility = vis
+
     }
 
     fun setOnActionsClickListener(
@@ -86,20 +97,11 @@ class TopAppBarCustom @JvmOverloads constructor(
         this.onPathClick = onPathClick
     }
 
-
-
-    /** Z-ADD Título simple en lugar de ruta */
-    fun setTitleText(text: String) {
-        // Si tu layout tiene un TextView para título en vez de tvPath:
-        tvPath.text = text
+    fun updateStorageStats(used: String, free: String) {
+        if (::tvStorageStats.isInitialized) {
+            tvStorageStats.text = "$used • $free"
+        }
     }
-    /** Z-ADD Oculta la sección ruta+stats */
-    fun showPathSection(show: Boolean) {
-        val vis = if (show) View.VISIBLE else View.GONE
-        tvPath.visibility = vis
-
-    }
-
 
     /** Muestra un PopupWindow con la ruta completa + botón copiar */
     private fun showFullPathPopup() {
@@ -136,5 +138,35 @@ class TopAppBarCustom @JvmOverloads constructor(
         // 4) Mostrar justo debajo de tvPath
         popup.showAsDropDown(tvPath, 0, 8)
     }
+
+    fun enterCopyMode(onCancel: ()->Unit) {
+        setNavigationIcon(R.drawable.ic_close)
+        setNavigationOnClickListener { onCancel() }
+    }
+    fun exitCopyMode() {
+        navigationIcon = null
+        setNavigationOnClickListener(null)
+    }
+
+
+    /** Modo “cancelar copia” */
+    fun showCancelSelection(onCancel: ()->Unit) {
+        // Cambia el icono de la izquierda por una X y asigna onClick
+        setNavigationIcon(R.drawable.ic_close)
+        setNavigationOnClickListener { onCancel() }
+    }
+
+    /** Sale del modo “cancelar copia” */
+    fun hideCancelSelection() {
+        navigationIcon = null
+        setNavigationOnClickListener(null)
+    }
+
+    /** (si lo necesitas) */
+    fun updateSelectionCount(n: Int) {
+        title = "$n seleccionados"
+    }
+
 }
+
 

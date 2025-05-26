@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
@@ -22,17 +23,20 @@ import com.google.android.material.navigation.NavigationBarView
 import com.zalune.fm_zeroa.presentation.ui.topbar.TopAppBarCustom
 import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.FragmentNavigator
-import com.zalune.fm_zeroa.utils.OnBackPressedHandler
+import com.zalune.fm_zeroa.presentation.navigation.OnBackPressedHandler
+import com.zalune.fm_zeroa.presentation.ui.fabmenu.FloatingActionsMenu
+import com.zalune.fm_zeroa.presentation.ui.viewmodel.FileListViewModel
 import com.zalune.fm_zeroa.utils.PermissionManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlin.getValue
 import kotlin.math.abs
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     @Inject lateinit var permissionManager: PermissionManager
-    private lateinit var topBar: TopAppBarCustom
+    lateinit var topBar: TopAppBarCustom
     private lateinit var bottomNav: BottomNavigationView
     private lateinit var navHostView: FrameLayout
     private var downX = 0f
@@ -57,6 +61,12 @@ class MainActivity : AppCompatActivity() {
     private var backPressedOnce = false
     private val backPressHandler = Handler(Looper.getMainLooper())
 
+    // Lo expongo para que los fragments lo puedan usar
+    val fabMenu: FloatingActionsMenu by lazy {
+        findViewById(R.id.fabMenu)
+    }
+    val fileListViewModel: FileListViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -65,18 +75,15 @@ class MainActivity : AppCompatActivity() {
         // Configuración de la TopBar
 
         topBar = findViewById(R.id.topAppBar)
-        topBar.setOnActionsClickListener(
-            onSearch    = { /* ... */ },
-            onViewMode  = { /* ... */ },
-            onMore      = { /* ... */ },
-            onPathClick = { /* ... */ }
-        )
+
+        topBar.updatePath("Almacenamiento")
+        topBar.updateStorageStats("0 B", "Calculando…")
         // Configuración de Navigation Component
         val navHost = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHost.navController
-        // Configuración de BottomNavigationView
 
+        // Configuración de BottomNavigationView
         bottomNav.setupWithNavController(navController)
         bottomNav.itemIconTintList = null
         bottomNav.itemTextColor = null

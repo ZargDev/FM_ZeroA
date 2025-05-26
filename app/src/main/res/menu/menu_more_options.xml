@@ -1,0 +1,23 @@
+<!-- res/menu/menu_more_options.xml -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_more_multiselect"
+        android:title="@string/menu_multi_select"
+        android:icon="@drawable/ic_list_view" />
+    <item
+        android:id="@+id/action_more_create"
+        android:title="@string/menu_create"
+        android:icon="@drawable/ic_create" />
+    <item
+        android:id="@+id/action_more_settings"
+        android:title="@string/menu_settings"
+        android:icon="@drawable/ic_settings" />
+    <item
+        android:id="@+id/action_more_about"
+        android:title="@string/menu_about"
+        android:icon="@drawable/ic_info" />
+    <item
+        android:id="@+id/action_more_exit"
+        android:title="@string/menu_exit"
+        android:icon="@drawable/ic_exit" />
+</menu>

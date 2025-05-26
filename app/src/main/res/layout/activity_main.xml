@@ -22,6 +22,17 @@
         app:defaultNavHost="true"
         app:navGraph="@navigation/nav_graph" />
 
+    <!-- FloatingActionsMenu siempre encima -->
+    <com.zalune.fm_zeroa.presentation.ui.fabmenu.FloatingActionsMenu
+        android:id="@+id/fabMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="24dp"
+        android:elevation="8dp"
+        app:layout_anchor="@id/nav_host_fragment"
+        app:layout_anchorGravity="bottom|end"/>
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
         android:layout_width="match_parent"

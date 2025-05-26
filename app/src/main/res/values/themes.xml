@@ -1,3 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base application theme. -->
+    <style name="Theme.FM_ZeroA" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Personaliza aquí colores, tipografías, etc. -->
+        <item name="colorPrimary">@color/md_theme_light_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
+        <!-- ... otros atributos ... -->
+        <item name="colorOnSurfaceVariant">@color/md_theme_light_onSurfaceVariant</item>
+        <item name="popupMenuStyle">@style/Widget.MaterialComponents.PopupMenu</item>
+        <item name="android:popupMenuStyle">@style/Widget.MaterialComponents.PopupMenu</item>
+
+    </style>
+
+    <!-- Diseño de Dialogos para la app -->
+    <style name="ThemeOverlay.FM_ZeroA.MaterialAlertDialog"
+        parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.FM_ZeroA.Dialog</item>
+    </style>
+    <style name="ShapeAppearance.FM_ZeroA.Dialog"
+        parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>>
+    <!--  Fin del diseño  -->
+
 </resources>
